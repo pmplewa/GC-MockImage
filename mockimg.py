@@ -147,12 +147,12 @@ def eccentric_anomaly(e, M, *args, **kwargs):
     if e < 1:
         f = lambda E: E-e*np.sin(E)-M
         fp = lambda E: 1-e*np.cos(E)
-        E0 = M if e < 0.8 else np.pi
+        E0 = M if e < 0.8 else np.sign(M)*np.pi
         E = mod2pi(newton(f, E0, fp, *args, **kwargs))
     else:
         f = lambda E: E-e*np.sinh(E)-M
         fp = lambda E: 1-e*np.cosh(E)
-        E0 = M/np.fabs(M)*np.log(2*np.fabs(M)/e + 1.8)
+        E = np.sign(M)*log(2*np.fabs(M)/e+1.8)
         E = newton(f, E0, fp, *args, **kwargs)
     return E
 
