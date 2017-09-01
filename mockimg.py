@@ -260,7 +260,7 @@ def gen_hdu(t, stars=stars, image_size=opts.n, pixel_scale=opts.s,
     return hdu
 
 def gen_plot(hdu, stars=stars, m0=20, m1=14, zero_point=opts.zp, labels=False,
-             output=None):
+             show=True, savefig=None):
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(1, 1, 1, projection=wcs.WCS(hdu.header))
     vmin = 10**(-0.4*(m0-zero_point))
@@ -281,9 +281,10 @@ def gen_plot(hdu, stars=stars, m0=20, m1=14, zero_point=opts.zp, labels=False,
     dec.set_major_formatter("dd:mm:ss.s")
     ra.set_axislabel("RA")
     dec.set_axislabel("DEC")
-    if output is not None:
-        plt.savefig(output)
-    plt.show()     
+    if savefig is not None:
+        plt.savefig(savefig)
+    if show:
+        plt.show()
 
 # ---------------------------------------------------------------------------- #
 
@@ -312,4 +313,5 @@ if __name__ == "__main__":
     fits.HDUList([hdu]).writeto(opts.output_fits, overwrite=True)
 
     if opts.preview or opts.output_preview is not None:
-        gen_plot(hdu, labels=opts.labels, output=opts.output_preview)
+        gen_plot(hdu, labels=opts.labels, show=opts.preview,
+                 savefig=opts.output_preview)
