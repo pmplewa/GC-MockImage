@@ -242,7 +242,7 @@ with jsonlines.open(resource_filename(__name__, "stars.ndjson")) as reader:
 # ---------------------------------------------------------------------------- #
 
 def gen_hdu(t, stars=stars, image_size=opts.n, pixel_scale=opts.s,
-            zero_point=opts.zp, preview=True):
+            zero_point=opts.zp):
     image = np.zeros((image_size, image_size))
     xi, yi = np.indices(image.shape)
 
