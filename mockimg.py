@@ -274,7 +274,7 @@ def gen_plot(hdu, stars=stars, m0=20, m1=14, zero_point=opts.zp, labels=False,
         for star in stars:
             p = star.locate(hdr["EPOCH"])
             x, y = w.all_world2pix(-p.x/60**2, p.y/60**2, 0)
-            ax.text(x, y, f"{star.name}", ha="center", va="center",
+            ax.text(x, y, star.name, ha="center", va="center",
                     clip_box=ax.bbox, clip_on=True)
     ra, dec = ax.coords
     ra.set_major_formatter("dd:mm:ss.s")
