@@ -257,7 +257,9 @@ def gen_hdu(t, stars=stars, image_size=opts.n, pixel_scale=opts.s,
         image += f*psf(np.sqrt((x-xi)**2+(y-yi)**2))
 
     w.wcs.crval = [266.41681662, -29.00782497]
-    hdu = fits.PrimaryHDU(np.fliplr(np.transpose(image)), w.to_header())
+    hdr = w.to_header()
+    hdr["EPOCH"] = t
+    hdu = fits.PrimaryHDU(np.fliplr(np.transpose(image)), hdr)
     return hdu
 
 def gen_plot(hdu, m0=20, m1=14, zero_point=opts.zp):
