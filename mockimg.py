@@ -64,9 +64,6 @@ parser.add_argument("--zero_point", "-zp", dest="zp",
                     type=float, default=14, metavar="float",
                     help="magnitude zero point (default: 14)")
 
-parser.add_argument("--preview", "-p", action="store_true", default=False,
-                    help="make a preview image")
-
 opts, _ = parser.parse_known_args()
 
 # ---------------------------------------------------------------------------- #
@@ -262,35 +259,57 @@ def gen_hdu(t, stars=stars, image_size=opts.n, pixel_scale=opts.s,
     hdu = fits.PrimaryHDU(np.fliplr(np.transpose(image)), hdr)
     return hdu
 
-def gen_plot(hdu, m0=20, m1=14, zero_point=opts.zp):
+def gen_plot(hdu, stars=stars, m0=20, m1=14, zero_point=opts.zp, labels=False,
+             output=None):
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(1, 1, 1, projection=wcs.WCS(hdu.header))
     vmin = 10**(-0.4*(m0-zero_point))
     vmax = 10**(-0.4*(m1-zero_point))
     ax.imshow(hdu.data, origin="lower", cmap="YlOrRd", interpolation="none",
               norm=LogNorm(vmin=vmin, vmax=vmax))
+    if labels:
+        hdr = hdu.header
+        w = wcs.WCS(hdr)
+        w.wcs.crval = [0, 0]
+        for star in stars:
+            p = star.locate(hdr["EPOCH"])
+            x, y = w.all_world2pix(-p.x/60**2, p.y/60**2, 0)
+            ax.text(x, y, f"{star.name}", ha="center", va="center",
+                    clip_box=ax.bbox, clip_on=True)
     ra, dec = ax.coords
     ra.set_major_formatter("dd:mm:ss.s")
     dec.set_major_formatter("dd:mm:ss.s")
     ra.set_axislabel("RA")
     dec.set_axislabel("DEC")
+    if output is not None:
+        plt.savefig(output)
     plt.show()     
 
 # ---------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
-    parser.add_argument("--output", "-o",
-                        type=str, required=True, metavar="string",
-                        help="name of output file (fits)")
-
     parser.add_argument("--epoch", "-t", dest="t",
                         type=float, required=True, metavar="float",
                         help="time of observation (year)")
 
+    parser.add_argument("--output_fits", "-o",
+                        type=str, required=False, metavar="string",
+                        help="name of output file (fits)")
+
+    parser.add_argument("--preview", "-p", action="store_true", default=False,
+                        help="make a preview image")
+
+    parser.add_argument("--labels", "-l", action="store_true", default=False,
+                        help="label stars on the preview image")
+
+    parser.add_argument("--output_preview", "-op",
+                        type=str, required=False, metavar="string",
+                        help="name of output file (image format)")    
+
     opts = parser.parse_args()
 
     hdu = gen_hdu(opts.t)
-    fits.HDUList([hdu]).writeto(opts.output, overwrite=True)
+    fits.HDUList([hdu]).writeto(opts.output_fits, overwrite=True)
 
-    if opts.preview:
-        gen_plot(hdu)
+    if opts.preview or opts.output_preview is not None:
+        gen_plot(hdu, labels=opts.labels, output=opts.output_preview)
