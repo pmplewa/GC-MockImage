@@ -66,8 +66,6 @@ parser.add_argument("--zero_point", "-zp", dest="zp",
 
 parser.add_argument("--preview", "-p", action="store_true", default=False,
                     help="make a preview image")
-parser.add_argument("--verbose", "-v", action="store_true", default=False,
-                    help="print pixel positions of included stars")
 
 opts, _ = parser.parse_known_args()
 
@@ -255,8 +253,6 @@ def gen_hdu(t, stars=stars, image_size=opts.n, pixel_scale=opts.s,
     for star in stars:
         p = star.locate(t)
         x, y = w.all_world2pix(p.x/60**2, p.y/60**2, 0)
-        if opts.verbose:
-            print(f"{star.name:5} {float(x):10.6} {float(y):10.6}")
         f = 10**(-0.4*(star.magnitude-zero_point))
         image += f*psf(np.sqrt((x-xi)**2+(y-yi)**2))
 
