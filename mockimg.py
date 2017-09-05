@@ -176,7 +176,7 @@ def orbit_to_particle(orbit, primary, t):
     assert orbit.e*np.cos(f) > -1, "Unbound orbit can not have f set beyond \
         the range allowed by the asymptotes set by the parabola."
 
-    r = orbit.a*(1-orbit.e*orbit.e)/(1+orbit.e*np.cos(f))
+    r = orbit.a*(1-orbit.e**2)/(1+orbit.e*np.cos(f))
     v = np.sqrt(mu/orbit.a/(1-orbit.e**2))
 
     cO = np.cos(orbit.Omega)
