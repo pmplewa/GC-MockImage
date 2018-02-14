@@ -7,9 +7,12 @@ Example ([data file](https://github.com/pmplewa/GCdb/blob/master/data/stars.ndjs
 python mockimg.py -h
 ```
 ```
-python mockimg.py -t 2018.3 -o image.fits -d stars.ndjson
+python mockimg.py -t 2018.3 -d stars.ndjson -o image.fits
 ```
 ```
->>> from mockimg import gen_hdu
->>> hdu = gen_hdu(2018.3)
+python mockimg.py -t 2018.3 -d stars.ndjson -o image.fits --preview --labels
+```
+```
+>>> from mockimg import gen_image
+>>> image_hdu, table_hdu = gen_image(2018.3)
 ```
