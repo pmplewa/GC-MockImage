@@ -231,7 +231,7 @@ def psf(r, f=opts.f):
 # ---------------------------------------------------------------------------- #    
 
 black_hole = Particle(mass=1)
-with jsonlines.open(resource_filename(__name__, "stars.ndjson")) as reader:
+with jsonlines.open(resource_filename(__name__, opts.data)) as reader:
     stars = [Star(**star, primary=black_hole) for star in reader]
 
 # ---------------------------------------------------------------------------- #
