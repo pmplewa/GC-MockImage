@@ -304,7 +304,7 @@ def gen_image(t):
 
     return fits.HDUList([image_hdu, table_hdu])
 
-def gen_plot(hdu_list, m0=20, m1=14, labels=False, show=True, save=None):
+def gen_plot(hdu_list, m0=20, m1=14, labels=True, show=True, save=None):
     image_hdu, table_hdu = hdu_list
     image_hdr = image_hdu.header
     image = image_hdu.data
@@ -346,11 +346,13 @@ if __name__ == "__main__":
                         type=str, required=False, metavar="string",
                         help="name of output file (fits)")  
 
-    parser.add_argument("--preview", "-p", action="store_true", default=False,
+    parser.add_argument("--preview", "-p",
+                        action="store_true", default=False,
                         help="show an interactive preview image")
 
-    parser.add_argument("--labels", "-l", action="store_true", default=False,
-                        help="label stars on the preview image")
+    parser.add_argument("--nolabels", "-nl", dest="labels",
+                        action="store_false", default=True,
+                        help="do not label stars on the preview image")
 
     parser.add_argument("--output_preview", "-op",
                         type=str, required=False, metavar="string",
