@@ -19,13 +19,13 @@ parser = ArgumentParser()
 
 def str_isfile(path):
     if not os.path.isfile(path):
-        raise ArgumentTypeError("File not found")
+        raise ArgumentTypeError("File not found.")
     return path
 
 def float_isfraction(x):
     x = float(x)
     if (x < 0) or (x > 1):
-         raise ArgumentTypeError("Fraction not between 0 and 1")
+         raise ArgumentTypeError("Fraction not between 0 and 1.")
     return x
 
 parser.add_argument("--data", "-d",
@@ -137,7 +137,7 @@ class Star():
         elif self.proper_motion is not None:
             return eval_proper_motion(self.proper_motion, self.primary, t)
         else:
-            raise Exception(f"Star {self.name} can not be located")    
+            raise Exception(f"Star {self.name} can not be located.")    
 
 # ---------------------------------------------------------------------------- #
 
@@ -170,12 +170,12 @@ def mean_motion(mu, a):
 # ---------------------------------------------------------------------------- #
 
 def eval_orbit(orbit, primary, t):
-    assert orbit.e != 1, "Can not initialize a radial orbit (e = 1)"
-    assert orbit.e >= 0, "A valid orbit must have e >= 0"
+    assert orbit.e != 1, "Can not initialize a radial orbit (e = 1)."
+    assert orbit.e >= 0, "A valid orbit must have e >= 0."
     if orbit.e > 1:
-        assert orbit.a < 0, "A bound orbit (a > 0) must have e < 1"
+        assert orbit.a < 0, "A bound orbit (a > 0) must have e < 1."
     else:
-        assert orbit.a > 0, "A bnbound orbit (a < 0) must have e > 1"
+        assert orbit.a > 0, "An unbound orbit (a < 0) must have e > 1."
 
     mu = G*(orbit.mass+primary.mass)
 
@@ -183,7 +183,7 @@ def eval_orbit(orbit, primary, t):
     M = mod2pi(n*(t-orbit.t0))
     f = true_anomaly(orbit.e, M)
     assert orbit.e*np.cos(f) > -1, "An unbound orbit can not have f set beyond \
-        the range allowed by the parabolic asymptotes"
+        the range allowed by the parabolic asymptotes."
 
     r = orbit.a*(1-orbit.e*orbit.e)/(1+orbit.e*np.cos(f))
     v = np.sqrt(mu/orbit.a/(1-orbit.e**2))
