@@ -288,8 +288,10 @@ def gen_image(t):
 
         table["name"][i] = star.name
         table["magnitude"][i] = star.magnitude
-        table[["x_pix", "y_pix"]][i] = y_pix, x_pix
-        table[["x", "y"]][i] = -p.x, p.y
+        table["x_pix"][i] = y_pix
+        table["y_pix"][i] = x_pix
+        table["x"] = -p.x
+        table["y"] = p.y
         table["vz"][i] = (p.vz*v_unit).to(units.km/units.s).value
 
     w.wcs.crval = [266.4168262, -29.0077969] # Sgr A* (ICRS)
