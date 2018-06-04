@@ -312,8 +312,10 @@ def gen_plot(hdu_list, m0=20, m1=14, labels=True, show=True, save=None):
     image = image_hdu.data
     table = table_hdu.data
 
+    w = wcs.WCS(image_hdr)
+
     fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(1, 1, 1, projection=wcs.WCS(image_hdr))
+    ax = fig.add_subplot(1, 1, 1, projection=w)
 
     vmin = 10**(-0.4*(m0-opts.zero_point))
     vmax = 10**(-0.4*(m1-opts.zero_point))
@@ -325,6 +327,9 @@ def gen_plot(hdu_list, m0=20, m1=14, labels=True, show=True, save=None):
         for label, x, y in zip(table["name"], table["x_pix"], table["y_pix"]):
             ax.text(x, y, label, ha="center", va="center",
                     clip_box=ax.bbox, clip_on=True)        
+        ax.set_autoscale_on(False)
+        ax.scatter(w.wcs.crval[0], w.wcs.crval[1], marker="x", color="k",
+                   transform=ax.get_transform("world"))
 
     ra, dec = ax.coords
     ra.set_major_formatter("dd:mm:ss.s")
