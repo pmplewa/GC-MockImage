@@ -267,7 +267,9 @@ def gen_image(t):
     float_type = {"numpy": float, "fits": "E"}
     dtype = {"name": str_type, "magnitude": float_type,
               "x_pix": float_type, "y_pix": float_type,
-              "x": float_type, "y": float_type, "vz": float_type}
+              "x": float_type, "y": float_type,
+              "vx": float_type, "vy": float_type,
+              "vz": float_type}
 
     table = np.empty(len(stars), dtype=[(k, dtype[k]["numpy"]) for k in dtype])
 
@@ -292,6 +294,8 @@ def gen_image(t):
         table["y_pix"][i] = x_pix
         table["x"][i] = -p.x
         table["y"][i] = p.y
+        table["vx"][i] = -p.vx
+        table["vy"][i] = p.vy
         table["vz"][i] = (p.vz*v_unit).to(units.km/units.s).value
 
     w.wcs.crval = [266.4168262, -29.0077969] # Sgr A* (ICRS)
