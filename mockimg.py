@@ -103,11 +103,14 @@ def is_flagged(d):
     return "flag" in d and d["flag"]
 
 class Star():
-    def __init__(self, primary, _id=None, orbit=[], proper_motion=[],
-                 magnitude=[], mass=0, **kwargs):
+    def __init__(self, primary, _id=None, mass=0, magnitude=[],
+            orbit=[], proper_motion=[], **kwargs):
         self.name = _id
         self.primary = primary
         self.mass = mass
+
+        self.magnitude = next((d["value"] for d in magnitude
+            if d["band"] == "K" and not is_flagged(d)), None)
 
         self.orbit = next((Orbit(mass=mass, **d) for d in orbit
             if not is_flagged(d)), None)
@@ -115,11 +118,8 @@ class Star():
         self.proper_motion = next((ProperMotion(**d) for d in proper_motion
             if not is_flagged(d)), None)
 
-        self.magnitude = next((d["value"] for d in magnitude
-            if d["band"] == "K" and not is_flagged(d)), None)
-
     def __repr__(self):
-      return "<{self.__class__.__name__} {self.name}>"
+      return f"<{self.__class__.__name__} {self.name}>"
 
     def locate(self, t):
         if self.orbit is not None:
@@ -132,30 +132,30 @@ class Star():
 # ------------------------------------------------------------------------------------------------ #
 
 def mod2pi(x):
-    return (x+np.pi)%(2*np.pi)-np.pi
+    return (x + np.pi) % (2 * np.pi) - np.pi
 
 def eccentric_anomaly(e, M, *args, **kwargs):
     if e < 1:
-        f = lambda E: E - e*np.sin(E) - M
-        fp = lambda E: 1 - e*np.cos(E)
-        E0 = M if e < 0.8 else np.sign(M)*np.pi
+        f = lambda E: E - e * np.sin(E) - M
+        fp = lambda E: 1 - e * np.cos(E)
+        E0 = M if e < 0.8 else np.sign(M) * np.pi
         E = mod2pi(newton(f, E0, fp, *args, **kwargs))
     else:
         f = lambda E: E - e*np.sinh(E) - M
         fp = lambda E: 1 - e*np.cosh(E)
-        E0 = np.sign(M) * np.log(2*np.fabs(M)/e+1.8)
+        E0 = np.sign(M) * np.log(2 * np.fabs(M) / e + 1.8)
         E = newton(f, E0, fp, *args, **kwargs)
     return E
 
 def true_anomaly(e, M):
     E = eccentric_anomaly(e, M)
     if e > 1:
-        return 2*np.arctan(np.sqrt((1+e)/(e-1))*np.tanh(E/2))
+        return 2 * np.arctan(np.sqrt((1 + e) / (e - 1)) * np.tanh(E / 2))
     else:
-        return 2*np.arctan(np.sqrt((1+e)/(1-e))*np.tan(E/2))
+        return 2 * np.arctan(np.sqrt((1 + e) / (1 - e)) * np.tan(E / 2))
 
 def mean_motion(mu, a):
-    return np.sign(a) * np.sqrt(np.fabs(mu/a**3))
+    return np.sign(a) * np.sqrt(np.fabs(mu / a**3))
 
 # ------------------------------------------------------------------------------------------------ #
 
@@ -244,11 +244,11 @@ def gen_header(hdr=None, **kwargs):
     default_keys = ["R0", "M0", "pix_scale", "wavelength", "aperture",
         "halo_frac", "halo_fwhm", "zero_point"]
 
-    for k in default_keys:
-        hdr[f"HIERARCH {k.upper()}"] = getattr(opts, k)
+    for key in default_keys:
+        hdr[f"HIERARCH {key.upper()}"] = getattr(opts, key)
 
-    for k, v in kwargs.items():
-        hdr[f"HIERARCH {k.upper()}"] = v
+    for key, value in kwargs.items():
+        hdr[f"HIERARCH {key.upper()}"] = value
 
     return hdr
 
@@ -266,7 +266,7 @@ def gen_image(t):
         "vy": float_type,
         "vz": float_type}
 
-    table = np.empty(len(stars), dtype=[(k, dtype[k]["numpy"]) for k in dtype])
+    table = np.empty(len(stars), dtype=[(key, dtype[key]["numpy"]) for key in dtype])
 
     w = wcs.WCS(naxis=2)
     w.wcs.ctype = ["RA---TAN", "DEC--TAN"]
@@ -300,8 +300,8 @@ def gen_image(t):
 
     table_hdr = gen_header(epoch=t)
     table_hdu = fits.BinTableHDU.from_columns(fits.ColDefs([
-        fits.Column(name=k, format=dtype[k]["fits"], array=table[k])
-        for k in table.dtype.names]), header=table_hdr)
+        fits.Column(name=key, format=dtype[key]["fits"], array=table[key])
+        for key in table.dtype.names]), header=table_hdr)
 
     return fits.HDUList([image_hdu, table_hdu])
 
@@ -323,12 +323,11 @@ def gen_plot(hdu_list, m0=20, m1=14, labels=True, show=True, save=None):
         norm=LogNorm(vmin=vmin, vmax=vmax))
 
     if labels:
-        for label, x, y in zip(table["name"], table["x_pix"], table["y_pix"]):
-            ax.text(x, y, label, ha="center", va="center", clip_box=ax.bbox, clip_on=True)
-
         ax.set_autoscale_on(False)
         ax.scatter(w.wcs.crval[0], w.wcs.crval[1], marker="x", color="k",
             transform=ax.get_transform("world"))
+        for label, x, y in zip(table["name"], table["x_pix"], table["y_pix"]):
+            ax.text(x, y, label, ha="center", va="center", clip_box=ax.bbox, clip_on=True)
 
     ra, dec = ax.coords
     ra.set_major_formatter("dd:mm:ss.s")
@@ -368,3 +367,25 @@ if __name__ == "__main__":
 
     if opts.preview or opts.output_preview is not None:
         gen_plot(hdu_list, labels=opts.labels, show=opts.preview, save=opts.output_preview)
+
+# ------------------------------------------------------------------------------------------------ #
+
+def test_gen_image():
+    t = 2018.3
+
+    # create image data using default parameters
+    hdu_list = gen_image(t)
+    assert len(hdu_list) == 2
+    image_hdu, table_hdu = hdu_list
+
+    assert np.isclose(image_hdu.header["EPOCH"], t)
+    assert np.isclose(image_hdu.header["R0"], opts.R0)
+    assert np.isclose(image_hdu.header["M0"], opts.M0)
+    assert len(image_hdu.data.shape) == 2
+    assert image_hdu.data.shape[0] == image_hdu.data.shape[1]
+    assert image_hdu.data.shape[0] == opts.image_size
+
+    assert np.isclose(table_hdu.header["EPOCH"], t)
+    assert np.isclose(table_hdu.header["R0"], opts.R0)
+    assert np.isclose(table_hdu.header["M0"], opts.M0)
+    assert len(table_hdu.data) > 0
